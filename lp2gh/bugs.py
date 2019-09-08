@@ -58,8 +58,14 @@ Imported from Launchpad using lp2gh.
 
 
 def message_to_dict(message):
-  owner = message.owner
-  return {'owner': owner.name,
+  # We skip errors caused by suspended users
+  try:
+    owner = message.owner
+    owner_name = owner.name or "unknown"
+  except:
+    owner_name = "unknown"
+
+  return {'owner': owner_name,
           'content': message.content,
           'date_created': util.to_timestamp(message.date_created),
           }
@@ -67,8 +73,19 @@ def message_to_dict(message):
 
 def bug_task_to_dict(bug_task):
   bug = bug_task.bug
-  assignee = bug_task.assignee
-  owner = bug_task.owner
+
+  # We skip errors caused by suspended users
+  try:
+    assignee = bug_task.assignee
+    assignee_name = assignee.name or None,
+  except:
+    assignee_name = None
+  try:
+    owner = bug_task.owner
+    owner_name = owner.name or "unknown"
+  except:
+    owner_name = "unknown"
+
   messages = list(bug.messages)[1:]
   milestone = bug_task.milestone
   duplicates = bug.duplicates
@@ -77,7 +94,7 @@ def bug_task_to_dict(bug_task):
           'status': bug_task.status,
           'importance': bug_task.importance,
           'assignee': assignee and assignee.name or None,
-          'owner': owner.name,
+          'owner': owner_name,
           'milestone': milestone and milestone.name,
           'title': bug.title,
           'description': bug.description,
